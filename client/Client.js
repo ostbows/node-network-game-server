@@ -16,13 +16,13 @@ class Client {
   }
 
   sendTcp(buffer) {
-    if (!this.tcpSocket) return;
-    this.tcpSocket.write(buffer);
+    if (this.tcpSocket) this.tcpSocket.write(buffer);
   }
 
   sendUdp(buffer) {
-    if (!this.udpServer || !this.udpRemotePort || !this.tcpSocket.remoteAddress) return;
-    this.udpServer.send(buffer, this.udpRemotePort, this.tcpSocket.remoteAddress);
+    if (this.udpServer && this.udpRemotePort && this.tcpSocket.remoteAddress) {
+      this.udpServer.send(buffer, this.udpRemotePort, this.tcpSocket.remoteAddress);
+    }
   }
 }
 

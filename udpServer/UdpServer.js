@@ -58,27 +58,30 @@ class UdpServer {
   }
 
   processInputs() {
-    if (!this.messages.length) return;
+    const message_count = this.messages.length;
 
-    console.log(`messages to process: ${this.messages.length}`);
+    if (message_count) {
+      console.log(`messages to process: ${message_count}`);
 
-    while (this.messages.length) {
-      this.onInput(this.messages[0]);
-      this.messages.shift();
+      let i = 0;
+      while (i < message_count) {
+        this.onInput(this.messages[i++]);
+      }
+
+      this.messages = this.messages.slice(i);
+      console.log(`messages left: ${this.messages.length}`);
     }
-
-    console.log(`messages left: ${this.messages.length}`);
   }
 
   onInput(message) {
-    if (!this.validateInput(message)) return;
+    if (this.validateInput(message)) {
+      const id = message[CmdKey.client_id];
+      this.entities[id].applyInput(message);
+      this.last_processed_input[id] = message[CmdKey.input_number];
 
-    const id = message[CmdKey.client_id];
-    this.entities[id].applyInput(message);
-    this.last_processed_input[id] = message[CmdKey.input_number];
-
-    if (!this.clients[id].udpRemotePort) {
-      this.clients[id].setUdpRemotePort(message.rinfo.port);
+      if (!this.clients[id].udpRemotePort) {
+        this.clients[id].setUdpRemotePort(message.rinfo.port);
+      }
     }
   }
 
