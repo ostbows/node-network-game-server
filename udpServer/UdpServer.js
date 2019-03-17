@@ -1,5 +1,6 @@
 const { createSocket } = require('dgram');
 const { bufferToObject, objectToBuffer } = require('../utils');
+const CmdKey = require('../cmd/CmdKey');
 
 class UdpServer {
   constructor(port, clients, entities, last_processed_input) {
@@ -72,9 +73,9 @@ class UdpServer {
   onInput(message) {
     if (!this.validateInput(message)) return;
 
-    const id = message.id;
+    const id = message[CmdKey.client_id];
     this.entities[id].applyInput(message);
-    this.last_processed_input[id] = message.i;
+    this.last_processed_input[id] = message[CmdKey.input_number];
 
     if (!this.clients[id].udpRemotePort) {
       this.clients[id].setUdpRemotePort(message.rinfo.port);
@@ -82,7 +83,7 @@ class UdpServer {
   }
 
   validateInput(message) {
-    return this.clients[message.id];
+    return this.clients[message[CmdKey.client_id]];
   }
 
   sendWorldState() {
