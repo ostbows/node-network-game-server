@@ -2,6 +2,8 @@ const net = require('net');
 const Client = require('../client/Client');
 const Entity = require('../entity/Entity');
 const { objectToBuffer, sizeOfObject } = require('../utils');
+const RpcKey = require('../rpc/RpcKey');
+const RpcType = require('../rpc/RpcType');
 
 class TcpServer {
   constructor(port, clients, entities, last_processed_input) {
@@ -46,14 +48,20 @@ class TcpServer {
     this.entities[id] = new Entity();
     this.last_processed_input[id] = 0;
 
-    this.clients[id].sendTcp(objectToBuffer({rpc: 'connected', id}));
+    const connected = {};
+    connected[RpcKey.type] = RpcType.connected;
+    connected[RpcKey.connected.client_id] = id;
+
+    this.clients[id].sendTcp(objectToBuffer(connected));
     console.log(`client #${id} connected, clients: ${sizeOfObject(this.clients)}`);
   }
 
   onDisconnect(socket) {
     const rport = socket.remotePort;
     const raddr = socket.remoteAddress;
-    const message = {rpc: 'disconnect', id: null};
+
+    const disconnected = {};
+    disconnected[RpcKey.type] = RpcType.disconnected;
 
     for (const id in this.clients) {
       const { remotePort, remoteAddress } = this.clients[id].tcpSocket;
@@ -63,14 +71,14 @@ class TcpServer {
         delete this.entities[id];
         delete this.last_processed_input[id];
 
-        message.id = id;
+        disconnected[RpcKey.disconnected.client_id] = id;
         console.log(`client #${id} disconnected, clients: ${sizeOfObject(this.clients)}`);
 
         break;
       }
     }
 
-    this.broadcast(objectToBuffer(message));
+    this.broadcast(objectToBuffer(disconnected));
   }
 
   broadcast(buffer) {

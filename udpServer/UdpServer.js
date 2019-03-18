@@ -1,6 +1,8 @@
 const { createSocket } = require('dgram');
 const { bufferToObject, objectToBuffer } = require('../utils');
 const CmdKey = require('../cmd/CmdKey');
+const RpcKey = require('../rpc/RpcKey');
+const RpcType = require('../rpc/RpcType');
 
 class UdpServer {
   constructor(port, clients, entities, last_processed_input) {
@@ -63,8 +65,7 @@ class UdpServer {
     if (message_count) {
       console.log(`messages to process: ${message_count}`);
 
-      let i = 0;
-      while (i < message_count) {
+      let i = 0; while (i < message_count) {
         this.onInput(this.messages[i++]);
       }
 
@@ -90,15 +91,19 @@ class UdpServer {
   }
 
   sendWorldState() {
-    const world_state = {rpc: 'state', state: []};
+    const world_state = {};
+    world_state[RpcKey.type] = RpcType.world_state;
+    world_state[RpcKey.world_state.states] = [];
 
     for (const id in this.entities) {
       const entity = this.entities[id];
 
-      world_state.state.push({id,
-        x: entity.x.toFixed(2),
-        lpi: this.last_processed_input[id]
-      });
+      const state = {};
+      state[RpcKey.world_state.state.entity_id] = id;
+      state[RpcKey.world_state.state.pos_x] = entity.x.toFixed(2);
+      state[RpcKey.world_state.state.last_processed_input] = this.last_processed_input[id];
+
+      world_state[RpcKey.world_state.states].push(state);
     }
 
     this.broadcast(objectToBuffer(world_state));
