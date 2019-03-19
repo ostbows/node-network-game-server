@@ -1,8 +1,4 @@
 class Client {
-  constructor() {
-    this.debug = false;
-  }
-
   setTcpSocket(socket) {
     this.tcpSocket = socket;
   }

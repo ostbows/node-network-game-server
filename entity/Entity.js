@@ -5,7 +5,6 @@ class Entity {
   constructor() {
     this.x = 10;
     this.speed = 30;
-    this.position_buffer = [];
   }
 
   applyInput(input) {
