@@ -1,8 +1,6 @@
 const { createSocket } = require('dgram');
-const { bufferToObject, objectToBuffer } = require('../utils');
-const CmdKey = require('../cmd/CmdKey');
-const RpcKey = require('../rpc/RpcKey');
-const RpcType = require('../rpc/RpcType');
+const cmd = require('../cmd');
+const rpc = require('../rpc');
 
 class UdpServer {
   constructor(port, clients, entities, last_processed_input) {
@@ -28,7 +26,7 @@ class UdpServer {
     });
 
     this.server.on('message', (msg, rinfo) => {
-      const message = bufferToObject(msg);
+      const message = cmd.parse(msg);
 
       if (message) {
         message.rinfo = rinfo;
@@ -66,41 +64,41 @@ class UdpServer {
     }
   }
 
-  onInput(message) {
-    if (!this.validateInput(message)) return;
+  onInput(input) {
+    if (this.validateInput(input)) {
+      const id = input.client_id;
+      this.entities[id].applyInput(input);
+      this.last_processed_input[id] = input.input_number;
 
-    const id = message[CmdKey.client_id];
-    this.entities[id].applyInput(message);
-    this.last_processed_input[id] = message[CmdKey.input_number];
-
-    if (!this.clients[id].udpRemotePort) {
-      this.clients[id].setUdpRemotePort(message.rinfo.port);
+      if (!this.clients[id].udpRemotePort) {
+        this.clients[id].setUdpRemotePort(input.rinfo.port);
+      }
     }
   }
 
-  validateInput(message) {
-    console.log(message);
-    return this.clients[message[CmdKey.client_id]];
+  validateInput(input) {
+    return this.clients[input.client_id];
   }
 
   sendWorldState() {
-    const world_state = {};
-    world_state[RpcKey.type] = RpcType.world_state;
-    world_state[RpcKey.world_state.states] = [];
+    const world_state = rpc.getWorldState(this.entities, this.last_processed_input);
+    /**
+     *  To be implemented in gms2
+     *
+    const world_state_size = (world_state.length - 1) / 8;
 
-    for (const id in this.entities) {
-      const entity = this.entities[id];
+    let j = 0;
+    console.log('action', world_state.readUInt8(j));
 
-      const state = {};
-      state[RpcKey.world_state.state.entity_id] = id;
-      state[RpcKey.world_state.state.pos_x] = entity.x.toFixed(2);
-      state[RpcKey.world_state.state.last_processed_input] = this.last_processed_input[id];
-
-      world_state[RpcKey.world_state.states].push(state);
+    for (let i = 0; i < world_state_size; i++) {
+      j += 1; console.log('entity id', world_state.readUInt8(j));
+      j += 1; console.log('position x', world_state.readFloatLE(j));
+      j += 4; console.log('last processed input', world_state.readUInt16LE(j));
+      j += 2; console.log('break', world_state.readInt8(j));
     }
-
-    this.broadcast(objectToBuffer(world_state));
-  };
+    */
+    this.broadcast(world_state);
+  }
 
   broadcast(buffer) {
     for (const id in this.clients) this.clients[id].sendUdp(buffer);

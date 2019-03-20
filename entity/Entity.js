@@ -1,5 +1,4 @@
-const CmdKey = require('../cmd/CmdKey');
-const CmdType = require('../cmd/CmdType');
+const { actions } = require('../cmd');
 
 class Entity {
   constructor() {
@@ -8,9 +7,9 @@ class Entity {
   }
 
   applyInput(input) {
-    switch (input[CmdKey.type]) {
-      case CmdType.move:
-        this.x += (input[CmdKey.move.press_time]/1000) * this.speed;
+    switch (input.action) {
+      case actions.move:
+        this.x += input.press_time * this.speed;
         break;
     }
   }
