@@ -81,23 +81,7 @@ class UdpServer {
   }
 
   sendWorldState() {
-    const world_state = rpc.getWorldState(this.entities, this.last_processed_input);
-    /**
-     *  To be implemented in gms2
-     *
-    const world_state_size = (world_state.length - 1) / 8;
-
-    let j = 0;
-    console.log('action', world_state.readUInt8(j));
-
-    for (let i = 0; i < world_state_size; i++) {
-      j += 1; console.log('entity id', world_state.readUInt8(j));
-      j += 1; console.log('position x', world_state.readFloatLE(j));
-      j += 4; console.log('last processed input', world_state.readUInt16LE(j));
-      j += 2; console.log('break', world_state.readInt8(j));
-    }
-    */
-    this.broadcast(world_state);
+    this.broadcast(rpc.getWorldState(this.entities, this.last_processed_input));
   }
 
   broadcast(buffer) {

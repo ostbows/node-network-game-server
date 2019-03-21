@@ -1,9 +1,9 @@
 const { sizeOfObject } = require('../utils');
 
 const actions = {
-  connected: 0,
+  world_state: 0,
   disconnected: 1,
-  world_state: 2
+  connected: 2
 };
 
 exports.getConnected = client_id => {
