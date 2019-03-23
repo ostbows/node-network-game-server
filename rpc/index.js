@@ -6,10 +6,11 @@ const actions = {
   connected: 2
 };
 
-exports.getConnected = client_id => {
-  const buffer = Buffer.allocUnsafe(2);
+exports.getConnected = (client_id, update_rate) => {
+  const buffer = Buffer.allocUnsafe(3);
   buffer.writeUInt8(actions.connected, 0);
   buffer.writeUInt8(client_id, 1);
+  buffer.writeUInt8(update_rate, 2);
   return buffer;
 };
 

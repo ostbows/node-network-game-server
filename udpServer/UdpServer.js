@@ -13,10 +13,6 @@ class UdpServer {
     this.messages = [];
   }
 
-  getServer() {
-    return this.server;
-  }
-
   startServer(update_rate) {
     this.update_rate = update_rate;
 
