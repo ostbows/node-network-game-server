@@ -16,7 +16,9 @@ class Client {
   }
 
   sendUdp(buffer) {
-    this.udpServer.send(buffer, this.udpRemotePort, this.tcpSocket.remoteAddress);
+    if (this.udpRemotePort) {
+      this.udpServer.send(buffer, this.udpRemotePort, this.tcpSocket.remoteAddress);
+    }
   }
 }
 
