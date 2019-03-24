@@ -47,7 +47,7 @@ class TcpServer {
     this.entities[id] = new Entity();
     this.last_processed_input[id] = 0;
 
-    this.clients[id].sendTcp(rpc.getConnected(id, this.udpServer.update_rate));
+    this.clients[id].sendTcp(rpc.getConnected(id, this.udpServer.update_rate, this.entities[id].speed));
     console.log(`client #${id} connected, clients: ${sizeOfObject(this.clients)}`);
   }
 

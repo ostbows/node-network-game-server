@@ -3,7 +3,7 @@ const { actions } = require('../cmd');
 class Entity {
   constructor() {
     this.x = 10;
-    this.speed = 30;
+    this.speed = 50;
   }
 
   applyInput(input) {
