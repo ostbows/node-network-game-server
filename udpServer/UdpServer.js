@@ -63,7 +63,7 @@ class UdpServer {
   onInput(input) {
     if (this.validateInput(input)) {
       const id = input.client_id;
-      this.entities[id].applyInput(input);
+      this.entities[id].applyInput(input, this.entities);
       this.last_processed_input[id] = input.input_number;
 
       if (!this.clients[id].udpRemotePort) {
